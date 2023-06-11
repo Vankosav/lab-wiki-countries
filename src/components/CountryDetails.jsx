@@ -1,25 +1,59 @@
 import { useParams, Link } from 'react-router-dom';
+import {useState, useEffect} from 'react';
 
-function CountryDetails(props) {
-  const { countryId } = useParams(); // Access the alpha3Code parameter from the URL
+function CountryDetails() {
+  const [country, setCountry] = useState(null);
+  const { countryId } = useParams(); 
 
-  // Find the country object based on the alpha3Code
-  const country = props.countries.find(
-    (country) => country.alpha3Code === countryId
-  );
+useEffect(() => {
+    fetch(`https://ih-countries-api.herokuapp.com/countries/${countryId}`)
+    .then((res) => res.json())
+    .then((data) => setCountry(data));
+}, [countryId]);
+
+if(!country) {
+    return <h2>Loading...</h2>
+}
+
+
 
   // Return JSX to display country details
   return (
-    <div>
+    <div className="col-7">
       <Link className="list-group-item list-group-item-action" to={`/countries/${countryId}`}>
         {country.name.common}
+        <br></br>
         <img src={`https://flagpedia.net/data/flags/icon/72x54/${country.alpha2Code.toLowerCase()}.png`} alt={country.name.common} />
       </Link>
-      <p>Country's Official Name: {country.name.official}</p>
-      <p>Country's Capital: {country.capital}</p>
-      <p>Country's Region: {country.region}</p>
-
-      
+      <table className="table">
+      <thead></thead>
+              <tbody>
+      <tr>
+      <td style={{width: 30}}>Country's Official Name: </td>
+      <td style={{width: 30}}>{country.name.official}</td>
+      </tr>
+      <tr>
+      <td style={{width: 30}}>Country's Capital:</td>
+      <td style={{width: 30}}> {country.capital}</td>
+      </tr>
+      <tr>
+      <td style={{width: 30}}>Country's Area:</td>
+      <td style={{width: 30}}> {country.area} km<sup>2</sup></td>
+      </tr>
+      <tr>
+  <td style={{width: 30}}>Borders</td>
+  <td style={{width: 30}}>
+    <ul>
+      {country.borders.map((border) => (
+        <li key={border}>
+          <Link to={`/countries/${border}`}>{border}</Link>
+        </li>
+      ))}
+    </ul>
+  </td>
+</tr>
+</tbody>
+      </table>
     </div>
   );
 }
